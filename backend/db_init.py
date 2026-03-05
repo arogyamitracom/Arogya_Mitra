@@ -4,7 +4,7 @@ DB_CONFIG = {
     "host": "localhost",
     "user": "root",
     "password": "admin",
-    "database": "arogya_mitra"
+    "database": "django_db"
 }
 
 def create_users_table():

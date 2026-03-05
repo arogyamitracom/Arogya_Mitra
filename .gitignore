@@ -27,3 +27,9 @@ yarn-error.log*
 __pycache__/
 *.py[cod]
 *$py.class
+
+# important
+.env
+
+# Test 
+test.py
