@@ -1,10 +1,16 @@
+import os
 import mysql.connector
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env from the same directory as this script
+load_dotenv(Path(__file__).resolve().parent / '.env')
 
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "admin",
-    "database": "django_db"
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "user": os.environ.get("DB_USER", "root"),
+    "password": os.environ.get("DB_PASSWORD", ""),
+    "database": os.environ.get("DB_NAME", "django_db"),
 }
 
 def create_users_table():
