@@ -3,6 +3,7 @@ import React, { Suspense, lazy } from 'react';
 import './App.css';
 
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 function App() {
   return (
@@ -10,7 +11,8 @@ function App() {
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#8b5cf6' }}>Loading...</div>}>
         <Routes>
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<Navigate to="/register" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
@@ -18,3 +20,4 @@ function App() {
 }
 
 export default App;
+

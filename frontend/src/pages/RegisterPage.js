@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import './RegisterPage.css';
 
 const API_BASE = 'http://localhost:8000/api';
 
 function RegisterPage() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -81,7 +83,7 @@ function RegisterPage() {
             const data = await response.json();
 
             if (response.ok) {
-                setSubmitStatus({ type: 'success', message: 'Registration successful! You can now log in.' });
+                setSubmitStatus({ type: 'success', message: 'Registration successful! Redirecting to login...' });
                 setFormData({
                     first_name: '',
                     last_name: '',
@@ -91,6 +93,7 @@ function RegisterPage() {
                     date_of_birth: '',
                 });
                 setErrors({});
+                setTimeout(() => navigate('/login'), 1500);
             } else {
                 // Map backend field errors
                 if (typeof data === 'object') {
@@ -188,7 +191,7 @@ function RegisterPage() {
                     </button>
 
                     <div className="login-link-container">
-                        <p>Already have an account? <a href="/login" className="login-link">Login</a></p>
+                        <p>Already have an account? <Link to="/login" className="login-link">Login</Link></p>
                     </div>
                 </form>
             </div>
