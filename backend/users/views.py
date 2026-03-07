@@ -6,6 +6,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import RegisterSerializer, LoginSerializer
 from .utils import send_welcome_email
+from .auth import generate_access_token, generate_refresh_token, decode_token
+from .decorators import jwt_required
+from .models import User
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +42,7 @@ def register_view(request):
 
 @api_view(['POST'])
 def login_view(request):
-    """Handle user login."""
+    """Handle user login and return JWT tokens."""
     serializer = LoginSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -47,6 +50,8 @@ def login_view(request):
         return Response(
             {
                 "message": "Login successful.",
+                "access_token": generate_access_token(user),
+                "refresh_token": generate_refresh_token(user),
                 "user": {
                     "id": user.id,
                     "first_name": user.first_name,
@@ -58,3 +63,52 @@ def login_view(request):
         )
 
     return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])
+def token_refresh_view(request):
+    """Issue a new access token using a valid refresh token."""
+    refresh_token = request.data.get('refresh_token')
+
+    if not refresh_token:
+        return Response(
+            {'error': 'Refresh token is required.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        payload = decode_token(refresh_token, expected_type='refresh')
+    except ValueError as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    try:
+        user = User.objects.get(id=payload['user_id'])
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'User not found.'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    return Response(
+        {'access_token': generate_access_token(user)},
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(['GET'])
+@jwt_required
+def me_view(request):
+    """Return current authenticated user's data."""
+    user = request.user
+    return Response(
+        {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+        },
+        status=status.HTTP_200_OK,
+    )

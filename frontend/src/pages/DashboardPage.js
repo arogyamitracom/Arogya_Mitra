@@ -1,13 +1,14 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './DashboardPage.css';
 
 function DashboardPage() {
     const navigate = useNavigate();
-    const location = useLocation();
-    const user = location.state?.user || null;
+    const { user, logout } = useAuth();
 
     const handleLogout = () => {
+        logout();
         navigate('/login');
     };
 

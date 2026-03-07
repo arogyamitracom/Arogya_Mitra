@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
 import './LoginPage.css';
 
@@ -7,6 +8,8 @@ const API_BASE = 'http://localhost:8000/api';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const { login } = useAuth();
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -20,7 +23,6 @@ function LoginPage() {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Clear field error on change
         if (errors[name]) {
             setErrors((prev) => {
                 const updated = { ...prev };
@@ -70,11 +72,10 @@ function LoginPage() {
             if (response.ok) {
                 setSubmitStatus({ type: 'success', message: `Welcome back, ${data.user.first_name}!` });
                 setErrors({});
-                setTimeout(() => navigate('/dashboard', { state: { user: data.user } }), 1000);
+                login(data.access_token, data.refresh_token, data.user);
+                setTimeout(() => navigate('/dashboard'), 1000);
             } else {
-                // Map backend field errors
                 if (data.non_field_errors) {
-                    // DRF wraps serializer-level validation errors in non_field_errors
                     const backendErrors = {};
                     const errorObj = typeof data.non_field_errors[0] === 'object'
                         ? data.non_field_errors[0]
