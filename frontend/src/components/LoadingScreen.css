@@ -1,0 +1,45 @@
+.loading-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0f1117;
+    gap: 24px;
+}
+
+.loading-logo {
+    width: 72px;
+    height: 72px;
+    animation: logoPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(255, 255, 255, 0.06);
+    border-top-color: #1f73b7;
+    border-right-color: #4caf50;
+    border-radius: 50%;
+    animation: spinRotate 0.9s linear infinite;
+}
+
+@keyframes spinRotate {
+    to {
+        transform: rotate(360deg);
+    }
+}

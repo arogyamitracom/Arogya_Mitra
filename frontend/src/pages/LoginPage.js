@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import './LoginPage.css';
 
 const API_BASE = 'http://localhost:8000/api';
 
 function LoginPage() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -69,6 +70,7 @@ function LoginPage() {
             if (response.ok) {
                 setSubmitStatus({ type: 'success', message: `Welcome back, ${data.user.first_name}!` });
                 setErrors({});
+                setTimeout(() => navigate('/dashboard', { state: { user: data.user } }), 1000);
             } else {
                 // Map backend field errors
                 if (data.non_field_errors) {
