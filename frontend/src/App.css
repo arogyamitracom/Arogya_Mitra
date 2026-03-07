@@ -20,4 +20,24 @@ body {
     color: #f0f2f5;
     line-height: 1.5;
     min-height: 100vh;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31, 115, 183, 0.4) rgba(255, 255, 255, 0.03);
+}
+
+/* Custom scrollbar — Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #1f73b7, #4caf50);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #2986d6, #5cc460);
 }

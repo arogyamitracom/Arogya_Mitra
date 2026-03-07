@@ -1,19 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './InputField.css';
 
 function InputField({ label, type, name, value, onChange, error, required }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === 'password';
+  const inputType = isPassword && showPassword ? 'text' : (type || 'text');
+
   return (
     <div className="input-field">
       <label htmlFor={name}>{label}{required && <span className="required">*</span>}</label>
-      <input
-        id={name}
-        type={type || 'text'}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className={error ? 'input-error' : ''}
-      />
+      <div className="input-wrapper">
+        <input
+          id={name}
+          type={inputType}
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          className={error ? 'input-error' : ''}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword((prev) => !prev)}
+            tabIndex={-1}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? '🙈' : '👁️'}
+          </button>
+        )}
+      </div>
       {error && <span className="error-message">{error}</span>}
     </div>
   );
