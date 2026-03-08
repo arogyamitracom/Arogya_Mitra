@@ -14,6 +14,28 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+    --bg-main: #0f1117;
+    --text-primary: #f0f2f5;
+    --text-secondary: #8b8fa3;
+    --text-muted: #6b7280;
+    --card-bg: rgba(255, 255, 255, 0.025);
+    --border-color: rgba(255, 255, 255, 0.05);
+    --hover-bg: rgba(255, 255, 255, 0.04);
+    --card-shadow: none;
+}
+
+[data-theme='light'] {
+    --bg-main: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --hover-bg: #f1f5f9;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #0f1117;
@@ -21,7 +43,7 @@ body {
     line-height: 1.5;
     min-height: 100vh;
     scrollbar-width: thin;
-    scrollbar-color: rgba(31, 115, 183, 0.4) rgba(255, 255, 255, 0.03);
+    scrollbar-color: rgba(31, 115, 183, 0.4) var(--border-color);
 }
 
 /* Custom scrollbar — Webkit (Chrome, Edge, Safari) */

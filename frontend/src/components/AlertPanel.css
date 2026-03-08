@@ -1,0 +1,74 @@
+.alert-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 22px 20px;
+    box-shadow: var(--card-shadow);
+}
+
+.alert-panel-title {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+}
+
+.alert-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.alert-dot--red {
+    background: #f87171;
+}
+
+.alert-dot--amber {
+    background: #fbbf24;
+}
+
+.alert-dot--green {
+    background: #4ade80;
+}
+
+.alert-dot--blue {
+    background: #60a5fa;
+}
+
+.alert-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-item-text {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.alert-item-time {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}

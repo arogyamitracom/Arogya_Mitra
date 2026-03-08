@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Activity, Calculator, Brain, TrendingUp, BellRing, FileText } from 'lucide-react';
 import './LandingPage.css';
 
 /* ---- Scroll animation hook ---- */
@@ -32,37 +33,37 @@ function useScrollReveal() {
 /* ---- Feature data ---- */
 const features = [
     {
-        icon: '📊',
+        icon: <Activity size={24} />,
         color: 'blue',
         title: 'Health Data Logging',
         desc: 'Track weight, BP, blood sugar, heart rate, sleep, water intake and step count — all in one place.',
     },
     {
-        icon: '🧮',
+        icon: <Calculator size={24} />,
         color: 'green',
         title: 'BMI & Health Score',
         desc: 'Automatic BMI calculation with WHO classification and a dynamic 0–100 health score.',
     },
     {
-        icon: '🤖',
+        icon: <Brain size={24} />,
         color: 'purple',
         title: 'AI Risk Prediction',
         desc: 'Machine learning models assess your diabetes and heart disease risk with probability scoring.',
     },
     {
-        icon: '📈',
+        icon: <TrendingUp size={24} />,
         color: 'cyan',
         title: 'Trend Analysis',
         desc: 'Interactive weekly and monthly graphs to visualize your health progress over time.',
     },
     {
-        icon: '⚠️',
+        icon: <BellRing size={24} />,
         color: 'amber',
         title: 'Smart Alerts',
         desc: 'Instant notifications for abnormal values, high-risk predictions and goal milestones.',
     },
     {
-        icon: '📄',
+        icon: <FileText size={24} />,
         color: 'rose',
         title: 'Health Reports',
         desc: 'Download monthly PDF summaries with graphs, risk analysis and your overall health overview.',
