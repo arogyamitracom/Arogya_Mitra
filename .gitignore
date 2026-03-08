@@ -10,7 +10,7 @@ node_modules/
 /coverage
 
 # production
-/build
+build
 
 # misc
 .DS_Store
@@ -33,3 +33,4 @@ __pycache__/
 
 # Test 
 test.py
+temp
