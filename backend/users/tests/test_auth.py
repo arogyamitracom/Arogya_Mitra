@@ -3,17 +3,16 @@ from rest_framework import status
 from django.urls import reverse
 from unittest.mock import patch
 from users.models import User
-from django.contrib.auth.hashers import make_password
 
 
 class AuthTests(APITestCase):
     def setUp(self):
-        # Create a user for login tests
-        self.user = User.objects.create(
+        # Create a user for login tests using the custom manager
+        self.user = User.objects.create_user(
             first_name="Test",
             last_name="User",
             email="testuser@example.com",
-            password_hash=make_password("password123"),
+            password="password123",
             date_of_birth="2000-01-01"
         )
         self.register_url = reverse('register')
@@ -32,7 +31,7 @@ class AuthTests(APITestCase):
         response = self.client.post(self.register_url, self.valid_register_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], "Registration successful.")
-        
+
         # Verify user was created in the database
         self.assertTrue(User.objects.filter(email="janedoe@example.com").exists())
         mock_threading.Thread.assert_called_once()  # Background thread was initialized
@@ -54,7 +53,7 @@ class AuthTests(APITestCase):
         # Attempt to register with the setup user's email
         invalid_payload = self.valid_register_payload.copy()
         invalid_payload["email"] = "testuser@example.com"
-        
+
         response = self.client.post(self.register_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('email', response.data)

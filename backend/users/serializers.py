@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.auth.hashers import make_password, check_password
 from .models import User
 
 
@@ -17,8 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        validated_data['password_hash'] = make_password(password)
-        return User.objects.create(**validated_data)
+        return User.objects.create_user(password=password, **validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -36,7 +34,7 @@ class LoginSerializer(serializers.Serializer):
                 {"email": "No account found with this email."}
             )
 
-        if not check_password(password, user.password_hash):
+        if not user.check_password(password):
             raise serializers.ValidationError(
                 {"password": "Incorrect password."}
             )
