@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
 import './LoginPage.css';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 function LoginPage() {
     const navigate = useNavigate();

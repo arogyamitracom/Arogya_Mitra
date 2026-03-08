@@ -4,7 +4,7 @@ import threading
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserProfileSerializer
 from .utils import send_welcome_email
 from .auth import generate_access_token, generate_refresh_token, decode_token
 from .decorators import jwt_required
@@ -52,12 +52,7 @@ def login_view(request):
                 "message": "Login successful.",
                 "access_token": generate_access_token(user),
                 "refresh_token": generate_refresh_token(user),
-                "user": {
-                    "id": user.id,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email,
-                },
+                "user": UserProfileSerializer(user).data,
             },
             status=status.HTTP_200_OK,
         )
@@ -100,15 +95,9 @@ def token_refresh_view(request):
 
 @api_view(['GET'])
 @jwt_required
-def me_view(request):
-    """Return current authenticated user's data."""
-    user = request.user
+def user_profile_view(request):
+    """Return current authenticated user's profile data."""
     return Response(
-        {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-        },
+        UserProfileSerializer(request.user).data,
         status=status.HTTP_200_OK,
     )

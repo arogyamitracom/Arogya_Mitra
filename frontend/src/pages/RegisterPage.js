@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import './RegisterPage.css';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 function RegisterPage() {
     const navigate = useNavigate();

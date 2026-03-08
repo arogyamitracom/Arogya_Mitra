@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 const AuthContext = createContext(null);
 
@@ -42,7 +42,7 @@ function AuthProvider({ children }) {
         }
 
         try {
-            let response = await fetch(`${API_BASE}/me/`, {
+            let response = await fetch(`${API_BASE}/profile/`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
 
@@ -54,7 +54,7 @@ function AuthProvider({ children }) {
                     setIsLoading(false);
                     return;
                 }
-                response = await fetch(`${API_BASE}/me/`, {
+                response = await fetch(`${API_BASE}/profile/`, {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
             }

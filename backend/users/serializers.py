@@ -1,5 +1,15 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password as django_validate_password
 from .models import User
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Reusable serializer for user profile data."""
+
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'email']
+        read_only_fields = fields
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -9,9 +19,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['first_name', 'last_name', 'email', 'password', 'date_of_birth']
 
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+    def validate_password(self, value):
+        django_validate_password(value)
         return value
 
     def create(self, validated_data):
