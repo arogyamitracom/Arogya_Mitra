@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, FileText, ActivitySquare, Target, BookOpen, User, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, FileText, ActivitySquare, Target, BookOpen, User, LogOut, PanelLeftClose, PanelLeftOpen, Menu } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 import './Sidebar.css';
 
 const navItems = [
@@ -17,10 +18,23 @@ function Sidebar({ collapsed, onToggle }) {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-    const handleLogout = () => {
+    const handleLogoutClick = () => {
+        setMobileMenuOpen(false);
+        setLogoutModalOpen(true);
+    };
+
+    const confirmLogout = () => {
+        setLogoutModalOpen(false);
         logout();
         navigate('/login');
+    };
+
+    // Close mobile menu when a link is clicked
+    const handleMobileLinkClick = () => {
+        setMobileMenuOpen(false);
     };
 
     return (
@@ -59,7 +73,7 @@ function Sidebar({ collapsed, onToggle }) {
                 <div className="sidebar-bottom">
                     <button
                         className="sidebar-link sidebar-link--danger"
-                        onClick={handleLogout}
+                        onClick={handleLogoutClick}
                         title={collapsed ? 'Logout' : ''}
                     >
                         <span className="sidebar-icon"><LogOut size={20} /></span>
@@ -70,17 +84,73 @@ function Sidebar({ collapsed, onToggle }) {
 
             {/* Mobile bottom tab bar */}
             <nav className="mobile-tab-bar">
-                {navItems.slice(0, 5).map((item) => (
+                {/* Show first 4 items directly on the bar */}
+                {navItems.slice(0, 4).map((item) => (
                     <Link
                         key={item.path}
                         to={item.path}
                         className={`tab-item ${location.pathname === item.path ? 'active' : ''}`}
+                        onClick={handleMobileLinkClick}
                     >
                         <span className="tab-icon">{item.icon}</span>
                         <span>{item.label}</span>
                     </Link>
                 ))}
+
+                {/* 5th item is the Menu button */}
+                <button
+                    className={`tab-item ${mobileMenuOpen ? 'active' : ''}`}
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    <span className="tab-icon"><Menu size={20} /></span>
+                    <span>Menu</span>
+                </button>
             </nav>
+
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <>
+                    <div className="mobile-menu-backdrop" onClick={() => setMobileMenuOpen(false)} />
+                    <div className="mobile-menu-sheet">
+                        <div className="mobile-menu-header">
+                            <h3>More Options</h3>
+                        </div>
+                        <div className="mobile-menu-content">
+                            {/* Items that didn't fit in the main tab bar */}
+                            {navItems.slice(4).map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}
+                                    onClick={handleMobileLinkClick}
+                                >
+                                    <span className="sidebar-icon">{item.icon}</span>
+                                    <span className="sidebar-label">{item.label}</span>
+                                </Link>
+                            ))}
+
+                            <div className="sidebar-divider" style={{ margin: '16px 0' }} />
+
+                            <button className="sidebar-link sidebar-link--danger" onClick={handleLogoutClick}>
+                                <span className="sidebar-icon"><LogOut size={20} /></span>
+                                <span className="sidebar-label">Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Reusable Confirmation Modal for Logout */}
+            <ConfirmModal
+                isOpen={logoutModalOpen}
+                title="Confirm Logout"
+                message="Are you sure you want to sign out? You will need to log in again to access your dashboard."
+                confirmText="Log Out"
+                cancelText="Cancel"
+                onConfirm={confirmLogout}
+                onCancel={() => setLogoutModalOpen(false)}
+                isDestructive={true}
+            />
         </>
     );
 }

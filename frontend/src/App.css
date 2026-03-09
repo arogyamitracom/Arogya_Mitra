@@ -12,6 +12,7 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
 :root {
@@ -42,6 +43,7 @@ body {
     color: #f0f2f5;
     line-height: 1.5;
     min-height: 100vh;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgba(31, 115, 183, 0.4) var(--border-color);
 }

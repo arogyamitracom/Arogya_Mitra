@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import './InputField.css';
 
 function InputField({ label, type, name, value, onChange, error, required }) {
@@ -27,7 +28,7 @@ function InputField({ label, type, name, value, onChange, error, required }) {
             tabIndex={-1}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
       </div>

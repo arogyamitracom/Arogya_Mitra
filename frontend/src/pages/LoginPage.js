@@ -73,7 +73,7 @@ function LoginPage() {
                 setSubmitStatus({ type: 'success', message: `Welcome back, ${data.user.first_name}!` });
                 setErrors({});
                 login(data.access_token, data.refresh_token, data.user);
-                setTimeout(() => navigate('/dashboard'), 1000);
+                navigate('/dashboard');
             } else {
                 if (data.non_field_errors) {
                     const backendErrors = {};
