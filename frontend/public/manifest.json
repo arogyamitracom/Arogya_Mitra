@@ -1,6 +1,7 @@
 {
   "short_name": "Arogya Mitra",
-  "name": "Arogya Mitra",
+  "name": "Arogya Mitra — Health Tracking & Risk Monitoring",
+  "description": "AI-powered personal health tracking and risk monitoring system. Track vitals, predict health risks, and take control of your well-being.",
   "icons": [
     {
       "src": "favicon.png",
@@ -11,10 +12,18 @@
       "src": "logo-1.png",
       "type": "image/png",
       "sizes": "192x192"
+    },
+    {
+      "src": "logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#0f1117",
+  "background_color": "#0f1117"
 }

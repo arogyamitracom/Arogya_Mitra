@@ -65,7 +65,21 @@
 
 ---
 
-## 7. API Endpoints
+## 7. Progressive Web App (PWA)
+
+- **Installable** — users can install Arogya Mitra as a standalone app on mobile and desktop
+- **Service worker** — Workbox-based with multiple caching strategies:
+  - **Precaching** — all build assets cached on install for instant load
+  - **Cache-first** for images and fonts (fast repeat loads)
+  - **Network-first** for API calls (fresh data when online, cached when offline)
+- **Offline support** — app shell loads even without internet
+- **iOS support** — `apple-mobile-web-app-capable` meta tags for Safari
+- **Auto-update** — new versions detected and logged for seamless updates
+- **512x512 maskable icon** — meets all PWA installability requirements
+
+---
+
+## 8. API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -76,7 +90,7 @@
 
 ---
 
-## 8. Tech Stack
+## 9. Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -86,11 +100,12 @@
 | **Auth** | Custom JWT (PyJWT) |
 | **Email** | Gmail SMTP |
 | **Admin** | Django Admin + Jazzmin |
+| **PWA** | Workbox (service worker + caching) |
 | **Deployment** | PythonAnywhere (backend), Vercel (frontend) |
 
 ---
 
-## 9. Project Structure
+## 10. Project Structure
 
 ```
 Arogya-Mitra/
@@ -111,10 +126,16 @@ Arogya-Mitra/
 │   │   └── tests/        # Unit tests
 │   └── manage.py
 ├── frontend/
+│   ├── public/
+│   │   ├── manifest.json # PWA manifest
+│   │   ├── logo-512.png  # PWA icon (512x512)
+│   │   └── index.html    # App shell with PWA meta tags
 │   ├── src/
 │   │   ├── pages/        # Page components
 │   │   ├── components/   # Reusable components
 │   │   ├── context/      # Auth & Theme contexts
+│   │   ├── service-worker.js           # Workbox service worker
+│   │   ├── serviceWorkerRegistration.js # SW registration
 │   │   ├── App.js        # Root component + routing
 │   │   └── index.js      # Entry point
 │   └── .env              # API base URL config
