@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Sidebar from '../components/Sidebar';
@@ -9,29 +9,12 @@ import {
     AreaChart, Area, LineChart, Line,
     XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { Pill, Activity, Footprints, Scale, Moon, Sun, Plus, HeartPulse, ShieldAlert, LineChart as LineChartIcon, TrendingDown } from 'lucide-react';
+import { Pill, Activity, Footprints, Scale, Moon, Sun, Plus, HeartPulse, ShieldAlert, LineChart as LineChartIcon, TrendingDown, Loader } from 'lucide-react';
 import './DashboardPage.css';
 
-/* ---------- Mock Data ---------- */
-const bpData = [
-    { day: 'Mon', systolic: 120, diastolic: 78 },
-    { day: 'Tue', systolic: 118, diastolic: 76 },
-    { day: 'Wed', systolic: 125, diastolic: 82 },
-    { day: 'Thu', systolic: 122, diastolic: 79 },
-    { day: 'Fri', systolic: 130, diastolic: 85 },
-    { day: 'Sat', systolic: 119, diastolic: 77 },
-    { day: 'Sun', systolic: 121, diastolic: 80 },
-];
+const API_BASE = process.env.REACT_APP_API_BASE;
 
-const weightData = [
-    { week: 'W1', kg: 72.5 },
-    { week: 'W2', kg: 72.1 },
-    { week: 'W3', kg: 71.8 },
-    { week: 'W4', kg: 71.5 },
-    { week: 'W5', kg: 71.9 },
-    { week: 'W6', kg: 71.2 },
-];
-
+/* ---------- Mock Data (Alerts & Goals — to be replaced later) ---------- */
 const mockAlerts = [
     { severity: 'red', message: 'Blood pressure reading above normal range (130/85).', time: '2 hours ago' },
     { severity: 'amber', message: 'Blood sugar level slightly elevated at 140 mg/dL.', time: '5 hours ago' },
@@ -69,6 +52,27 @@ const ChartTooltip = ({ active, payload, label }) => {
     );
 };
 
+/* ---------- Empty Chart Placeholder ---------- */
+function EmptyChartMessage({ message }) {
+    return (
+        <div style={{
+            height: 250, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500,
+        }}>
+            {message || 'No data yet. Start logging your health!'}
+        </div>
+    );
+}
+
+/* ---------- BMI Category Helper ---------- */
+function getBmiCategory(bmi) {
+    if (!bmi) return { label: '--', color: 'green' };
+    if (bmi < 18.5) return { label: 'Underweight', color: 'amber' };
+    if (bmi < 25) return { label: 'Normal', color: 'green' };
+    if (bmi < 30) return { label: 'Overweight', color: 'amber' };
+    return { label: 'Obese', color: 'red' };
+}
+
 /* ---------- Greeting Helper ---------- */
 function getGreeting() {
     const hour = new Date().getHours();
@@ -89,6 +93,8 @@ function DashboardPage() {
     const { theme, toggleTheme } = useTheme();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [resizing, setResizing] = useState(false);
+    const [dashData, setDashData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const axisColor = theme === 'light' ? '#94a3b8' : '#4b5063';
 
@@ -97,6 +103,55 @@ function DashboardPage() {
         setSidebarCollapsed(!sidebarCollapsed);
         setTimeout(() => setResizing(false), 350);
     };
+
+    // Fetch dashboard data from API
+    useEffect(() => {
+        const fetchDashboard = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/dashboard/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setDashData(data);
+                }
+            } catch (err) {
+                console.error('Failed to load dashboard data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDashboard();
+    }, []);
+
+    // Extract data safely
+    const profile = dashData?.profile;
+    const latestLog = dashData?.latest_log;
+    const bmi = dashData?.bmi;
+    const bmiCat = getBmiCategory(bmi);
+
+    // Format chart data
+    const bpChartData = (dashData?.bp_trend || []).map((log) => {
+        const d = new Date(log.date);
+        return {
+            day: d.toLocaleDateString('en-IN', { weekday: 'short' }),
+            systolic: log.systolic_bp,
+            diastolic: log.diastolic_bp,
+        };
+    });
+
+    const weightChartData = (dashData?.weight_trend || []).map((log, idx) => ({
+        week: `W${idx + 1}`,
+        kg: parseFloat(log.weight_kg),
+    }));
+
+    // Compute weight Y-axis domain dynamically
+    const weightValues = weightChartData.map(d => d.kg);
+    const weightMin = weightValues.length ? Math.floor(Math.min(...weightValues) - 1) : 60;
+    const weightMax = weightValues.length ? Math.ceil(Math.max(...weightValues) + 1) : 80;
 
     return (
         <div className="dashboard-layout">
@@ -128,84 +183,121 @@ function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Stat Cards */}
-                <div className="dash-stats">
-                    <StatCard
-                        icon={<Activity size={24} />} iconColor="green"
-                        label="Health Score" value="78"
-                        sub="Out of 100" badge="Good" badgeColor="green"
-                    />
-                    <StatCard
-                        icon={<Scale size={24} />} iconColor="blue"
-                        label="BMI" value="22.4"
-                        sub="Height: 178cm" badge="Normal" badgeColor="green"
-                    />
-                    <StatCard
-                        icon={<HeartPulse size={24} />} iconColor="rose"
-                        label="Heart Rate" value="72"
-                        sub="BPM • Resting"
-                    />
-                    <StatCard
-                        icon={<ShieldAlert size={24} />} iconColor="amber"
-                        label="Risk Level" value="Low"
-                        sub="Diabetes & Heart" badge="No action needed" badgeColor="green"
-                    />
-                </div>
-
-                {/* Charts Row */}
-                <div className="dash-charts">
-                    <div className="dash-chart-card">
-                        <div className="dash-chart-title">
-                            <LineChartIcon size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#60a5fa' }} /> Blood Pressure (7 days)
-                        </div>
-                        <div className="dash-chart-body">
-                            <ResponsiveContainer width="99%" height={250}>
-                                <AreaChart data={bpData}>
-                                    <defs>
-                                        <linearGradient id="gradSys" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.3} />
-                                            <stop offset="100%" stopColor="#60a5fa" stopOpacity={0} />
-                                        </linearGradient>
-                                        <linearGradient id="gradDia" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#4ade80" stopOpacity={0.2} />
-                                            <stop offset="100%" stopColor="#4ade80" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <XAxis dataKey="day" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis domain={[60, 140]} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<ChartTooltip />} />
-                                    <Area type="monotone" dataKey="systolic" name="Systolic" stroke="#60a5fa" fill="url(#gradSys)" strokeWidth={2} />
-                                    <Area type="monotone" dataKey="diastolic" name="Diastolic" stroke="#4ade80" fill="url(#gradDia)" strokeWidth={2} />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                        <Loader size={32} className="spin-animation" style={{ color: 'var(--text-muted)' }} />
                     </div>
-
-                    <div className="dash-chart-card">
-                        <div className="dash-chart-title">
-                            <TrendingDown size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#a78bfa' }} /> Weight Trend (6 weeks)
+                ) : (
+                    <>
+                        {/* Stat Cards */}
+                        <div className="dash-stats">
+                            <StatCard
+                                icon={<Activity size={24} />} iconColor="green"
+                                label="Health Score"
+                                value={profile?.current_health_score ?? '--'}
+                                sub="Out of 100"
+                                badge={profile?.current_health_score >= 70 ? 'Good' : profile?.current_health_score >= 40 ? 'Fair' : 'Low'}
+                                badgeColor={profile?.current_health_score >= 70 ? 'green' : profile?.current_health_score >= 40 ? 'amber' : 'red'}
+                            />
+                            <StatCard
+                                icon={<Scale size={24} />} iconColor="blue"
+                                label="BMI"
+                                value={bmi ?? '--'}
+                                sub={profile?.height_cm ? `Height: ${profile.height_cm}cm` : 'Set height in profile'}
+                                badge={bmiCat.label}
+                                badgeColor={bmiCat.color}
+                            />
+                            <StatCard
+                                icon={<HeartPulse size={24} />} iconColor="rose"
+                                label="Heart Rate"
+                                value={latestLog?.heart_rate_bpm ?? '--'}
+                                sub={latestLog?.heart_rate_bpm ? 'BPM • Resting' : 'No reading yet'}
+                            />
+                            <StatCard
+                                icon={<ShieldAlert size={24} />} iconColor="amber"
+                                label="Risk Level"
+                                value={profile?.current_risk_level ?? '--'}
+                                sub="Diabetes & Heart"
+                                badge={profile?.current_risk_level === 'Low' ? 'No action needed' : 'Monitor'}
+                                badgeColor={profile?.current_risk_level === 'Low' ? 'green' : 'amber'}
+                            />
                         </div>
-                        <div className="dash-chart-body">
-                            <ResponsiveContainer width="99%" height={250}>
-                                <LineChart data={weightData}>
-                                    <XAxis dataKey="week" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis domain={[70, 73]} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<ChartTooltip />} />
-                                    <Line type="monotone" dataKey="kg" name="Weight" stroke="#a78bfa" strokeWidth={2.5} dot={{ r: 4, fill: '#a78bfa' }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Bottom Row */}
-                <div className="dash-bottom">
-                    <AlertPanel alerts={mockAlerts} />
-                    <GoalTracker goals={mockGoals} />
-                </div>
+                        {/* Charts Row */}
+                        <div className="dash-charts">
+                            <div className="dash-chart-card">
+                                <div className="dash-chart-title">
+                                    <LineChartIcon size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#60a5fa' }} />
+                                    Blood Pressure ({bpChartData.length} {bpChartData.length === 1 ? 'day' : 'days'})
+                                </div>
+                                <div className="dash-chart-body">
+                                    {bpChartData.length >= 2 ? (
+                                        <ResponsiveContainer width="99%" height={250}>
+                                            <AreaChart data={bpChartData}>
+                                                <defs>
+                                                    <linearGradient id="gradSys" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.3} />
+                                                        <stop offset="100%" stopColor="#60a5fa" stopOpacity={0} />
+                                                    </linearGradient>
+                                                    <linearGradient id="gradDia" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#4ade80" stopOpacity={0.2} />
+                                                        <stop offset="100%" stopColor="#4ade80" stopOpacity={0} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <XAxis dataKey="day" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis domain={[60, 140]} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                                <Tooltip content={<ChartTooltip />} />
+                                                <Area type="monotone" dataKey="systolic" name="Systolic" stroke="#60a5fa" fill="url(#gradSys)" strokeWidth={2} />
+                                                <Area type="monotone" dataKey="diastolic" name="Diastolic" stroke="#4ade80" fill="url(#gradDia)" strokeWidth={2} />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <EmptyChartMessage message={
+                                            bpChartData.length === 1
+                                                ? 'Need at least 2 readings to show a trend. Keep logging!'
+                                                : 'No blood pressure data yet. Log your first reading!'
+                                        } />
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="dash-chart-card">
+                                <div className="dash-chart-title">
+                                    <TrendingDown size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: '#a78bfa' }} />
+                                    Weight Trend ({weightChartData.length} {weightChartData.length === 1 ? 'entry' : 'entries'})
+                                </div>
+                                <div className="dash-chart-body">
+                                    {weightChartData.length >= 2 ? (
+                                        <ResponsiveContainer width="99%" height={250}>
+                                            <LineChart data={weightChartData}>
+                                                <XAxis dataKey="week" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis domain={[weightMin, weightMax]} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                                <Tooltip content={<ChartTooltip />} />
+                                                <Line type="monotone" dataKey="kg" name="Weight" stroke="#a78bfa" strokeWidth={2.5} dot={{ r: 4, fill: '#a78bfa' }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <EmptyChartMessage message={
+                                            weightChartData.length === 1
+                                                ? 'Need at least 2 readings to show a trend. Keep logging!'
+                                                : 'No weight data yet. Log your first entry!'
+                                        } />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom Row */}
+                        <div className="dash-bottom">
+                            <AlertPanel alerts={mockAlerts} />
+                            <GoalTracker goals={mockGoals} />
+                        </div>
+                    </>
+                )}
             </main>
         </div>
     );
 }
 
 export default DashboardPage;
+

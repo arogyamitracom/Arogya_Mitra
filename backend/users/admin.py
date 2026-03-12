@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm
-from .models import User
+from .models import User, UserProfile, HealthLog
 
 class UserCreationForm(forms.ModelForm):
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
@@ -48,4 +48,15 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'height_cm', 'blood_group', 'current_health_score', 'current_risk_level')
+    search_fields = ('user__email',)
+
+class HealthLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'date', 'weight_kg', 'systolic_bp', 'diastolic_bp', 'heart_rate_bpm')
+    list_filter = ('date',)
+    search_fields = ('user__email',)
+
 admin.site.register(User, UserAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(HealthLog, HealthLogAdmin)

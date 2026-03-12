@@ -47,3 +47,33 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='health_profile')
+    height_cm = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    blood_group = models.CharField(max_length=5, blank=True, null=True)
+    current_health_score = models.IntegerField(default=100)
+    current_risk_level = models.CharField(max_length=50, default="Low")
+
+    class Meta:
+        db_table = 'user_profiles'
+
+    def __str__(self):
+        return f"Profile of {self.user.email}"
+
+
+class HealthLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='health_logs')
+    date = models.DateField(auto_now_add=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    systolic_bp = models.IntegerField(null=True, blank=True)
+    diastolic_bp = models.IntegerField(null=True, blank=True)
+    heart_rate_bpm = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'health_logs'
+        ordering = ['-date'] # Newest logs first
+
+    def __str__(self):
+        return f"Log for {self.user.email} on {self.date}"

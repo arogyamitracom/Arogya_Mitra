@@ -4,11 +4,11 @@ import threading
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, LoginSerializer, UserProfileSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserProfileSerializer, HealthProfileSerializer, HealthLogSerializer
 from .utils import send_welcome_email
 from .auth import generate_access_token, generate_refresh_token, decode_token
 from .decorators import jwt_required
-from .models import User
+from .models import User, UserProfile, HealthLog
 
 logger = logging.getLogger(__name__)
 
@@ -101,3 +101,43 @@ def user_profile_view(request):
         UserProfileSerializer(request.user).data,
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(['GET'])
+@jwt_required
+def dashboard_view(request):
+    """Return all dashboard data for the authenticated user."""
+    user = request.user
+
+    # Auto-create health profile if it doesn't exist
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+
+    # Get the latest log for stat cards
+    latest_log = HealthLog.objects.filter(user=user).first()  # ordered by -date in model Meta
+
+    # BP trend: last 7 logs that have BP data
+    bp_logs = HealthLog.objects.filter(
+        user=user,
+        systolic_bp__isnull=False,
+        diastolic_bp__isnull=False,
+    ).order_by('date')[:7]
+
+    # Weight trend: last 6 logs that have weight data
+    weight_logs = HealthLog.objects.filter(
+        user=user,
+        weight_kg__isnull=False,
+    ).order_by('date')[:6]
+
+    # Compute BMI if possible
+    bmi = None
+    if profile.height_cm and latest_log and latest_log.weight_kg:
+        height_m = float(profile.height_cm) / 100
+        bmi = round(float(latest_log.weight_kg) / (height_m ** 2), 1)
+
+    return Response({
+        'profile': HealthProfileSerializer(profile).data,
+        'latest_log': HealthLogSerializer(latest_log).data if latest_log else None,
+        'bmi': bmi,
+        'bp_trend': HealthLogSerializer(bp_logs, many=True).data,
+        'weight_trend': HealthLogSerializer(weight_logs, many=True).data,
+    }, status=status.HTTP_200_OK)
